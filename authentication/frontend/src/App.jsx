@@ -74,11 +74,11 @@ function App() {
       <Route
         path="/questions"
         element={
-          <ProtectedRoute>
+          // <ProtectedRoute>
             <Layout>
               <QuestionsListPage />
             </Layout>
-          </ProtectedRoute>
+          // </ProtectedRoute>
         }
       />
 
@@ -86,11 +86,11 @@ function App() {
       <Route
         path="/questions/:id"
         element={
-          <ProtectedRoute>
+          // <ProtectedRoute>
             <Layout>
               <QuestionDetailPage />
             </Layout>
-          </ProtectedRoute>
+          // </ProtectedRoute>
         }
       />
 

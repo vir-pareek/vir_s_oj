@@ -1,13 +1,15 @@
 import Editor from "@monaco-editor/react";
 
-const EditorComponent = ()=> {
+const EditorComponent = ({ value, onValueChange, language }) => {
     return (
-        <Editor
+      <Editor
         height="400px"
-        defaultLanguage="cpp"
+        language={language}
         defaultValue="// Write your code here"
         theme="vs-dark"
-        />
+        value={value}
+        onChange={(value) => onValueChange(value || "")}
+      />
     );
 }
 export default EditorComponent;

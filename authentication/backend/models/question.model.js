@@ -1,7 +1,20 @@
 import mongoose from 'mongoose';
 
+// Define a schema for individual test cases FIRST
+const testCaseSchema = new mongoose.Schema({
+    input: {
+        type: String,
+        required: true,
+    },
+    expectedOutput: {
+        type: String,
+        required: true,
+    },
+});
+
+// NOW, use testCaseSchema inside the main questionSchema
 const questionSchema = new mongoose.Schema({
-    qid:{
+    qid: {
         type: String,
         required: true,
         unique: true
@@ -14,14 +27,16 @@ const questionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    input: {
-        type: String,
-        required: true  
-    },
-    output: {
+    sampleInput: {
         type: String,
         required: true
     },
+    sampleOutput: {
+        type: String,
+        required: true
+    },
+    // This line will now work correctly
+    testCases: [testCaseSchema],
     constraints: {
         type: String,
         required: true
@@ -30,7 +45,7 @@ const questionSchema = new mongoose.Schema({
         type: String,
         required: false
     }
-    
-});
+}, { timestamps: true });
 
-export const question = mongoose.model('question', questionSchema);
+
+export const Question = mongoose.model('Question', questionSchema);

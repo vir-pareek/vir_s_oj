@@ -2,6 +2,7 @@
 const { exec } = require("child_process");
 const fs = require('fs');
 const path = require('path');
+const deleteFile = require("./utils/deleteFile.js");
 
 const outputPath = path.join(__dirname, 'outputs');
 
@@ -15,7 +16,7 @@ const executeCpp = async (filePath, inputFilePath) => {
     const outPath = path.join(outputPath, `${jobId}.out`);
     return new Promise((resolve, reject) => {
         const execCmd = `g++ ${filePath} -o ${outPath} && cd ${outputPath} && ./$(basename ${outPath}) <${inputFilePath}`;
-        exec(execCmd, (error, stdout, stderr) => {
+        exec(execCmd, async (error, stdout, stderr) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
                 reject(error);
@@ -27,7 +28,9 @@ const executeCpp = async (filePath, inputFilePath) => {
                 return;
             }
             console.log(`Stdout: ${stdout}`);
+            
             resolve(stdout);
+             // Delete output file after execution
         });
     });
 }

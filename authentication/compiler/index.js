@@ -1,7 +1,8 @@
 const express = require("express");
 const cors = require('cors');
 const dotenv = require('dotenv');
-
+const fs = require('fs-extra');
+const deleteFile = require("./utils/deleteFile");
 const { generateFile, generateInputFile } = require("./generateFile");
 const { executeCpp, executePython, executeJava } = require("./execute");
 
@@ -43,8 +44,21 @@ app.post("/run", async (req, res) => {
         }
         if (language === 'java') {
             const output = await executeJava(filePath, inputFilePath);
+            if (await fs.pathExists(filePath)) {
+                await fs.remove(filePath);
+            }
+            else {
+                console.log("no path");
+            }
+            if (await fs.pathExists(inputFilePath)) {
+                await fs.remove(inputFilePath);
+            }
+            else {
+                console.log("no path");
+            }
             return res.json({ output });
         }
+         // Delete input file if it was created
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

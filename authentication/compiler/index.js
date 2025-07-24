@@ -32,14 +32,50 @@ app.post("/run", async (req, res) => {
 
         if (language === 'cpp') {
             const output = await executeCpp(filePath, inputFilePath);
+            if (await fs.pathExists(filePath)) {
+                await fs.remove(filePath);
+            }
+            else {
+                console.log("no path");
+            }
+            if (await fs.pathExists(inputFilePath)) {
+                await fs.remove(inputFilePath);
+            }
+            else {
+                console.log("no path");
+            }
             return res.json({ output });
         }
         if (language === 'c') {
             const output = await executeCpp(filePath, inputFilePath);
+            if (await fs.pathExists(filePath)) {
+                await fs.remove(filePath);
+            }
+            else {
+                console.log("no path");
+            }
+            if (await fs.pathExists(inputFilePath)) {
+                await fs.remove(inputFilePath);
+            }
+            else {
+                console.log("no path");
+            }
             return res.json({ output });
         }
         if (language === 'py') {
             const output = await executePython(filePath, inputFilePath);
+            if (await fs.pathExists(filePath)) {
+                await fs.remove(filePath);
+            }
+            else {
+                console.log("no path");
+            }
+            if (await fs.pathExists(inputFilePath)) {
+                await fs.remove(inputFilePath);
+            }
+            else {
+                console.log("no path");
+            }
             return res.json({ output });
         }
         if (language === 'java') {

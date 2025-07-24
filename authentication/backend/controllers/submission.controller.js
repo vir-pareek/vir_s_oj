@@ -2,6 +2,9 @@
 import { Submission } from "../models/submission.model.js";
 import { Question } from "../models/question.model.js";
 import axios from "axios";
+import { generateFile, generateInputFile } from "../../compiler/generateFile.js";
+import { executeCpp, executeJava, executePython } from "../../compiler/execute.js";
+import fs from "fs-extra"; // Ensure you have this package installed
 
 // Change 2: Renamed function for clarity and fixed the parameter name
 const runCodeAgainstTestCase = async (code, language, testCaseInput) => {
@@ -21,6 +24,103 @@ const runCodeAgainstTestCase = async (code, language, testCaseInput) => {
         console.error("Error from compiler service:", errorMessage);
         // Change 5: Return the error message in a consistent 'output' field for easier handling
         return { success: false, output: errorMessage };
+    }
+};
+const runCode = async (language, code, input) => {
+    try {
+        const filePath = generateFile(language, code);
+        const inputFilePath = generateInputFile(input);
+
+        let output;
+        if (language === 'cpp') {
+            output = await executeCpp(filePath, inputFilePath);
+            if (await fs.pathExists(filePath)) {
+                            await fs.remove(filePath);
+                        }
+                        else {
+                            console.log("no path");
+                        }
+                        if (await fs.pathExists(inputFilePath)) {
+                            await fs.remove(inputFilePath);
+                        }
+                        else {
+                            console.log("no path");
+                        }
+        }
+        else if (language === 'c') {
+            output = await executeCpp(filePath, inputFilePath);
+            if (await fs.pathExists(filePath)) {
+                await fs.remove(filePath);
+            }
+            else {
+                console.log("no path");
+            }
+            if (await fs.pathExists(inputFilePath)) {
+                await fs.remove(inputFilePath);
+            }
+            else {
+                console.log("no path");
+            }
+        }
+         else if (language === 'py') {
+            output = await executePython(filePath, inputFilePath);
+            if (await fs.pathExists(filePath)) {
+                await fs.remove(filePath);
+            }
+            else {
+                console.log("no path");
+            }
+            if (await fs.pathExists(inputFilePath)) {
+                await fs.remove(inputFilePath);
+            }
+            else {
+                console.log("no path");
+            }
+        } else if (language === 'java') {
+            output = await executeJava(filePath, inputFilePath);
+            if (await fs.pathExists(filePath)) {
+                await fs.remove(filePath);
+            }
+            else {
+                console.log("no path");
+            }
+            if (await fs.pathExists(inputFilePath)) {
+                await fs.remove(inputFilePath);
+            }
+            else {
+                console.log("no path");
+            }
+        } else {
+            throw new Error("Unsupported language");
+        }
+        return { success: true, output: output.trim() };
+    } catch (error) {
+        console.error("Error running code:", error);
+        return { success: false, output: error.toString() };
+    }
+};
+
+// This function handles a "dry run" against custom input.
+export const runCustomCode = async (req, res) => {
+    const { language, code, input } = req.body;
+
+    if (code === undefined) {
+        return res.status(400).json({ success: false, output: "Code is required." });
+    }
+
+    try {
+        // We can reuse the same helper function from the submission logic
+        const result = await runCode(language, code, input || ""); // Use empty string if input is null/undefined
+
+        if (result.success) {
+            return res.status(200).json({ success: true, output: result.output });
+        } else {
+            // If there was a compilation/runtime error, send it back with a 400 status
+            return res.status(400).json({ success: false, output: result.output });
+        }
+    } catch (error) {
+        console.error("Error in runCustomCode controller:", error);
+        return res.status(500).json({ success: false, output: "An internal server error occurred." });
     }
 };
 

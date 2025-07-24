@@ -7,7 +7,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="w-full flex items-center justify-between px-8 py-4 bg-[#003153] shadow-lg">
+    <nav className="w-full flex items-center justify-between px-10 py-5 bg-gray-900/90 shadow-xl rounded-b-3xl">
       {/* Platform Name */}
       <Link to="/" className="text-2xl font-extrabold bg-gradient-to-r from-cyan-300 to-teal-500 bg-clip-text text-transparent tracking-wide">
         CodeJoy

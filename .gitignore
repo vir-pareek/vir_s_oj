@@ -5,3 +5,8 @@
 # Environment variables
 .env
 .env.*
+
+# Runtime generated folders for the backend compiler
+/compiler/outputs/
+/compiler/codes/
+/compiler/inputs/

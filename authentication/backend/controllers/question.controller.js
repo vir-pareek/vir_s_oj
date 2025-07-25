@@ -141,6 +141,7 @@
 //     }
 // };
 
+import { Submission } from "../models/submission.model.js";
 import { Question } from "../models/question.model.js";
 
 // Create

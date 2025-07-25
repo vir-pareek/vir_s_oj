@@ -21,6 +21,12 @@ const Navbar = () => {
         >
           Questions
         </Link>
+        <Link
+          to="/submissions"
+          className="text-cyan-200 hover:text-teal-300 font-semibold transition-colors duration-200"
+        >
+          Submissions
+        </Link>
         <button
           onClick={() => navigate("/")}
           className="ml-4 p-2 rounded-full bg-gray-800 hover:bg-[#68e5e5] transition-colors duration-200"

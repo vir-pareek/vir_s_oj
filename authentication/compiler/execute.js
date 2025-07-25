@@ -1,6 +1,6 @@
 //creates new process basically shell in backend
 const { exec } = require("child_process");
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const deleteFile = require("./utils/deleteFile.js");
 
@@ -31,6 +31,12 @@ const executeCpp = async (filePath, inputFilePath) => {
             
             resolve(stdout);
              // Delete output file after execution
+            if (await fs.pathExists(outPath)) {
+                await fs.remove(outPath);
+            }
+            else {
+                console.log("no path");
+            }
              
         });
     });
@@ -60,7 +66,7 @@ const executeCpp = async (filePath, inputFilePath) => {
 const executePython = async (filePath, inputFilePath) => {
     const jobId = path.basename(filePath).split('.')[0];
     return new Promise((resolve, reject) => {
-        exec(`python3 ${filePath} < ${inputFilePath}`, (error, stdout, stderr) => {
+        exec(`python3 ${filePath} < ${inputFilePath}`, async (error, stdout, stderr) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
                 reject(error);
@@ -73,6 +79,12 @@ const executePython = async (filePath, inputFilePath) => {
             }
             console.log(`Stdout: ${stdout}`);
             resolve(stdout);
+            // if (await fs.pathExists(outPath)) {
+            //     await fs.remove(outPath);
+            // }
+            // else {
+            //     console.log("no path");
+            // }
         });
     });
 };
@@ -80,7 +92,7 @@ const executePython = async (filePath, inputFilePath) => {
 const executeJava = async (filePath, inputFilePath) => {
     // const jobId = path.basename(filePath).split('.')[0];
     return new Promise((resolve, reject) => {
-        exec(`java ${filePath} < ${inputFilePath}`, (error, stdout, stderr) => {
+        exec(`java ${filePath} < ${inputFilePath}`, async(error, stdout, stderr) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
                 reject(error);
@@ -93,6 +105,12 @@ const executeJava = async (filePath, inputFilePath) => {
             }
             console.log(`Stdout: ${stdout}`);
             resolve(stdout);
+            // if (await fs.pathExists(outPath)) {
+            //     await fs.remove(outPath);
+            // }
+            // else {
+            //     console.log("no path");
+            // }
         });
     });
 };

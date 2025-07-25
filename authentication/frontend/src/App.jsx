@@ -1,18 +1,29 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react"; // 1. Import Suspense
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-
-import SignUpPage from "./pages/SignUpPage";
-import LoginPage from "./pages/LoginPage";
-import DashboardPage from "./pages/DashboardPage";
-import QuestionsListPage from "./pages/QuestionsListPage";
-import QuestionDetailPage from "./pages/QuestionDetailPage";
-import CreateQuestionPage from "./pages/CreateQuestionPage";
-import UpdateQuestionPage from "./pages/UpdateQuestionPage";
 
 import LoadingSpinner from "./components/LoadingSpinner";
 import { checkAuth } from "./store/authSlice";
 import Layout from "./components/Layout";
+
+// 2. Lazy-load all the page components
+const SignUpPage = React.lazy(() => import("./pages/SignUpPage"));
+const LoginPage = React.lazy(() => import("./pages/LoginPage"));
+const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
+const QuestionsListPage = React.lazy(() => import("./pages/QuestionsListPage"));
+const QuestionDetailPage = React.lazy(() =>
+  import("./pages/QuestionDetailPage")
+);
+const CreateQuestionPage = React.lazy(() =>
+  import("./pages/CreateQuestionPage")
+);
+const UpdateQuestionPage = React.lazy(() =>
+  import("./pages/UpdateQuestionPage")
+);
+const SubmissionsPage = React.lazy(() => import("./pages/SubmissionsPage"));
+const SubmissionDetailPage = React.lazy(() =>
+  import("./pages/SubmissionDetailPage")
+);
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -36,96 +47,121 @@ function App() {
     if (authStatus === "idle") dispatch(checkAuth());
   }, [dispatch, authStatus]);
 
-  if (authStatus === "loading") return <LoadingSpinner />;
+  if (authStatus === "loading" || authStatus === "idle") {
+    return <LoadingSpinner />;
+  }
 
   return (
-    <Routes>
-      {/* Dashboard - protected and with layout */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <DashboardPage />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
+    // 3. Wrap the Routes component in a Suspense boundary
+    <Suspense fallback={<LoadingSpinner />}>
+      <Routes>
+        {/* Dashboard - protected and with layout */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <DashboardPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Auth pages - without layout */}
-      <Route
-        path="/signup"
-        element={
-          <RedirectAuthenticatedUser>
-            <SignUpPage />
-          </RedirectAuthenticatedUser>
-        }
-      />
-      <Route
-        path="/login"
-        element={
-          <RedirectAuthenticatedUser>
-            <LoginPage />
-          </RedirectAuthenticatedUser>
-        }
-      />
+        {/* Auth pages - without layout */}
+        <Route
+          path="/signup"
+          element={
+            <RedirectAuthenticatedUser>
+              <SignUpPage />
+            </RedirectAuthenticatedUser>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <RedirectAuthenticatedUser>
+              <LoginPage />
+            </RedirectAuthenticatedUser>
+          }
+        />
 
-      {/* Questions List */}
-      <Route
-        path="/questions"
-        element={
-          // <ProtectedRoute>
+        {/* Questions List */}
+        <Route
+          path="/questions"
+          element={
             <Layout>
               <QuestionsListPage />
             </Layout>
-          // </ProtectedRoute>
-        }
-      />
+          }
+        />
 
-      {/* Question Detail */}
-      <Route
-        path="/questions/:id"
-        element={
-          // <ProtectedRoute>
+        {/* Question Detail */}
+        <Route
+          path="/questions/:id"
+          element={
             <Layout>
               <QuestionDetailPage />
             </Layout>
-          // </ProtectedRoute>
-        }
-      />
+          }
+        />
 
-      {/* Admin-only: Create Question */}
-      <Route
-        path="/questions/create"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              {user?.isAdmin ? (
-                <CreateQuestionPage />
-              ) : (
-                <Navigate to="/questions" replace />
-              )}
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
+        {/* Submissions Page */}
+        <Route
+          path="/submissions"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SubmissionsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Admin-only: Update Question */}
-      <Route
-        path="/questions/update/:id"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              {user?.isAdmin ? (
-                <UpdateQuestionPage />
-              ) : (
-                <Navigate to="/questions" replace />
-              )}
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+        {/* Submission Detail Page */}
+        <Route
+          path="/submissions/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SubmissionDetailPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin-only: Create Question */}
+        <Route
+          path="/questions/create"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                {user?.isAdmin ? (
+                  <CreateQuestionPage />
+                ) : (
+                  <Navigate to="/questions" replace />
+                )}
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin-only: Update Question */}
+        <Route
+          path="/questions/update/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                {user?.isAdmin ? (
+                  <UpdateQuestionPage />
+                ) : (
+                  <Navigate to="/questions" replace />
+                )}
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Suspense>
   );
 }
 

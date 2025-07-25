@@ -1,14 +1,32 @@
-// src/components/Layout.jsx
+import React from "react";
 import Navbar from "./Navbar";
-
+import { Toaster } from "react-hot-toast"; // 1. IMPORT
 
 const Layout = ({ children }) => {
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-[#003153] via-[#0a2239] to-[#1e2a38] text-white font-sans">
-      <div className="flex flex-col flex-1">
-        <Navbar />
-        <main className="p-6 overflow-auto">{children}</main>
-      </div>
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* 2. ADD THE TOASTER COMPONENT HERE */}
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          // Define default options
+          className: "",
+          style: {
+            background: "#333",
+            color: "#fff",
+            border: "1px solid #555",
+          },
+          // Default options for specific types
+          success: {
+            duration: 3000,
+          },
+          error: {
+            duration: 5000,
+          },
+        }}
+      />
+      <Navbar />
+      <main className="p-4">{children}</main>
     </div>
   );
 };

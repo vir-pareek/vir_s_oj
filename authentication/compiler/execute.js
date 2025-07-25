@@ -1,52 +1,72 @@
-//creates new process basically shell in backend
-const { exec } = require("child_process");
-const fs = require('fs-extra');
-const path = require('path');
-const deleteFile = require("./utils/deleteFile.js");
+// //creates new process basically shell in backend
+// const { exec } = require("child_process");
+// const fs = require('fs-extra');
+// const path = require('path');
+// const deleteFile = require("./utils/deleteFile.js");
 
-const outputPath = path.join(__dirname, 'outputs');
+// const outputPath = path.join(__dirname, 'outputs');
 
-if (!fs.existsSync(outputPath)) {
-    fs.mkdirSync(outputPath, { recursive: true });
-}
+// if (!fs.existsSync(outputPath)) {
+//     fs.mkdirSync(outputPath, { recursive: true });
+// }
 
 
-const executeCpp = async (filePath, inputFilePath) => {
-    const jobId = path.basename(filePath).split('.')[0];
-    const outPath = path.join(outputPath, `${jobId}.out`);
-    return new Promise((resolve, reject) => {
-        const execCmd = `g++ ${filePath} -o ${outPath} && cd ${outputPath} && ./$(basename ${outPath}) <${inputFilePath}`;
-        exec(execCmd, async (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error: ${error.message}`);
-                reject(error);
-                return;
-            }
-            if (stderr) { // compilation and runtime errors
-                console.error(`Stderr: ${stderr}`);
-                reject(stderr);
-                return;
-            }
-            console.log(`Stdout: ${stdout}`);
-            
-            resolve(stdout);
-             // Delete output file after execution
-            if (await fs.pathExists(outPath)) {
-                await fs.remove(outPath);
-            }
-            else {
-                console.log("no path");
-            }
-             
-        });
-    });
-}
-
-// const executeC = async (filePath) => {
+// const executeCpp = async (filePath, inputFilePath) => {
 //     const jobId = path.basename(filePath).split('.')[0];
 //     const outPath = path.join(outputPath, `${jobId}.out`);
 //     return new Promise((resolve, reject) => {
-//         exec(`gcc ${filePath} -o ${outPath} && cd ${outputPath} && ./${jobId}.out`, (error, stdout, stderr) => {
+//         const execCmd = `g++ ${filePath} -o ${outPath} && cd ${outputPath} && ./$(basename ${outPath}) <${inputFilePath}`;
+//         exec(execCmd, async (error, stdout, stderr) => {
+//             if (error) {
+//                 console.error(`Error: ${error.message}`);
+//                 reject(error);
+//                 return;
+//             }
+//             if (stderr) { // compilation and runtime errors
+//                 console.error(`Stderr: ${stderr}`);
+//                 reject(stderr);
+//                 return;
+//             }
+//             console.log(`Stdout: ${stdout}`);
+            
+//             resolve(stdout);
+//              // Delete output file after execution
+//             if (await fs.pathExists(outPath)) {
+//                 await fs.remove(outPath);
+//             }
+//             else {
+//                 console.log("no path");
+//             }
+             
+//         });
+//     });
+// }
+
+// // const executeC = async (filePath) => {
+// //     const jobId = path.basename(filePath).split('.')[0];
+// //     const outPath = path.join(outputPath, `${jobId}.out`);
+// //     return new Promise((resolve, reject) => {
+// //         exec(`gcc ${filePath} -o ${outPath} && cd ${outputPath} && ./${jobId}.out`, (error, stdout, stderr) => {
+// //             if (error) {
+// //                 console.error(`Error: ${error.message}`);
+// //                 reject(error);
+// //                 return;
+// //             }
+// //             if (stderr) {//compilation and runtime errors
+// //                 console.error(`Stderr: ${stderr}`);
+// //                 reject(stderr);
+// //                 return;
+// //             }
+// //             console.log(`Stdout: ${stdout}`);
+// //             resolve(stdout);
+// //         });
+// //     });
+// // };
+
+// const executePython = async (filePath, inputFilePath) => {
+//     const jobId = path.basename(filePath).split('.')[0];
+//     return new Promise((resolve, reject) => {
+//         exec(`python3 ${filePath} < ${inputFilePath}`, async (error, stdout, stderr) => {
 //             if (error) {
 //                 console.error(`Error: ${error.message}`);
 //                 reject(error);
@@ -59,65 +79,119 @@ const executeCpp = async (filePath, inputFilePath) => {
 //             }
 //             console.log(`Stdout: ${stdout}`);
 //             resolve(stdout);
+//             // if (await fs.pathExists(outPath)) {
+//             //     await fs.remove(outPath);
+//             // }
+//             // else {
+//             //     console.log("no path");
+//             // }
 //         });
 //     });
 // };
 
-const executePython = async (filePath, inputFilePath) => {
-    const jobId = path.basename(filePath).split('.')[0];
+// const executeJava = async (filePath, inputFilePath) => {
+//     // const jobId = path.basename(filePath).split('.')[0];
+//     return new Promise((resolve, reject) => {
+//         exec(`java ${filePath} < ${inputFilePath}`, async(error, stdout, stderr) => {
+//             if (error) {
+//                 console.error(`Error: ${error.message}`);
+//                 reject(error);
+//                 return;
+//             }
+//             if (stderr) {//compilation and runtime errors
+//                 console.error(`Stderr: ${stderr}`);
+//                 reject(stderr);
+//                 return;
+//             }
+//             console.log(`Stdout: ${stdout}`);
+//             resolve(stdout);
+//             // if (await fs.pathExists(outPath)) {
+//             //     await fs.remove(outPath);
+//             // }
+//             // else {
+//             //     console.log("no path");
+//             // }
+//         });
+//     });
+// };
+// // add diff commands for diff languages
+
+// // c compile: gcc filename.c - o filename.out
+// // c execute: ./ filename.out
+// // python: python3 filename.py
+// // java: java YourFile.java
+// module.exports = { executeCpp, executePython, executeJava };
+const { exec } = require("child_process");
+const fs = require('fs');
+const path = require('path');
+
+const outputPath = path.join(__dirname, 'outputs');
+
+if (!fs.existsSync(outputPath)) {
+    fs.mkdirSync(outputPath, { recursive: true });
+}
+
+const EXECUTION_TIMEOUT = 10000; // 10 seconds
+
+const executeCodeInDocker = (command, filePath, inputFilePath) => {
+    const codeDir = path.dirname(filePath);
+    const inputDir = path.dirname(inputFilePath);
+    const jobDir = path.basename(codeDir); // Get the unique job directory name
+
+    const dockerCmd = `docker run --rm \
+        -v "${codeDir}:/usr/src/app" \
+        -v "${inputDir}:/usr/src/inputs" \
+        -w /usr/src/app \
+        codejoy-compiler \
+        bash -c '${command}'`;
+
     return new Promise((resolve, reject) => {
-        exec(`python3 ${filePath} < ${inputFilePath}`, async (error, stdout, stderr) => {
+        exec(dockerCmd, { timeout: EXECUTION_TIMEOUT }, (error, stdout, stderr) => {
+            // Cleanup the unique job directory for Java after execution
+            if (filePath.endsWith('.java')) {
+                fs.rm(codeDir, { recursive: true, force: true }, (err) => {
+                    if (err) console.error(`Failed to cleanup directory ${codeDir}:`, err);
+                });
+            }
+
             if (error) {
-                console.error(`Error: ${error.message}`);
-                reject(error);
-                return;
+                if (error.killed) return reject("Time Limit Exceeded");
+                return reject(stderr || error.message);
             }
-            if (stderr) {//compilation and runtime errors
-                console.error(`Stderr: ${stderr}`);
-                reject(stderr);
-                return;
+            if (stderr) {
+                console.error(`Execution STDERR for ${jobDir}: ${stderr}`);
             }
-            console.log(`Stdout: ${stdout}`);
             resolve(stdout);
-            // if (await fs.pathExists(outPath)) {
-            //     await fs.remove(outPath);
-            // }
-            // else {
-            //     console.log("no path");
-            // }
         });
     });
 };
 
-const executeJava = async (filePath, inputFilePath) => {
-    // const jobId = path.basename(filePath).split('.')[0];
-    return new Promise((resolve, reject) => {
-        exec(`java ${filePath} < ${inputFilePath}`, async(error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error: ${error.message}`);
-                reject(error);
-                return;
-            }
-            if (stderr) {//compilation and runtime errors
-                console.error(`Stderr: ${stderr}`);
-                reject(stderr);
-                return;
-            }
-            console.log(`Stdout: ${stdout}`);
-            resolve(stdout);
-            // if (await fs.pathExists(outPath)) {
-            //     await fs.remove(outPath);
-            // }
-            // else {
-            //     console.log("no path");
-            // }
-        });
-    });
+const executeCpp = (filePath, inputFilePath) => {
+    const codeFile = path.basename(filePath);
+    const inputFile = `/usr/src/inputs/${path.basename(inputFilePath)}`;
+    const command = `g++ ${codeFile} -o a.out && ./a.out < ${inputFile}; rm a.out`;
+    return executeCodeInDocker(command, filePath, inputFilePath);
 };
-// add diff commands for diff languages
 
-// c compile: gcc filename.c - o filename.out
-// c execute: ./ filename.out
-// python: python3 filename.py
-// java: java YourFile.java
-module.exports = { executeCpp, executePython, executeJava };
+const executePython = (filePath, inputFilePath) => {
+    const codeFile = path.basename(filePath);
+    const inputFile = `/usr/src/inputs/${path.basename(inputFilePath)}`;
+    const command = `python3 ${codeFile} < ${inputFile}`;
+    return executeCodeInDocker(command, filePath, inputFilePath);
+};
+
+// --- UPDATED JAVA EXECUTION ---
+const executeJava = (filePath, inputFilePath) => {
+    // Dynamically get the class name from the file path, removing the '.java' extension
+    const className = path.basename(filePath, '.java');
+    const inputFile = `/usr/src/inputs/${path.basename(inputFilePath)}`;
+    // The command now uses the dynamic class name
+    const command = `javac ${className}.java && java ${className} < ${inputFile}`;
+    return executeCodeInDocker(command, filePath, inputFilePath);
+};
+
+module.exports = {
+    executeCpp,
+    executePython,
+    executeJava
+};

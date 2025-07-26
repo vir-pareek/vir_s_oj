@@ -26,9 +26,13 @@ const executeCodeInDocker = (command, filePath, inputFilePath) => {
         bash -c '${command}'`;
 
     return new Promise((resolve, reject) => {
-        exec(dockerCmd, { timeout: EXECUTION_TIMEOUT }, (error, stdout, stderr) => {
+        exec(dockerCmd, { timeout: EXECUTION_TIMEOUT }, async (error, stdout, stderr) => {
             if (filePath.endsWith('.java')) {
-                fs.rm(codeDir, { recursive: true, force: true }).catch(err => console.error(`Failed to cleanup dir ${codeDir}:`, err));
+                try {
+                    await fs.promises.rm(codeDir, { recursive: true, force: true });
+                } catch (err) {
+                    console.error(`Failed to cleanup dir ${codeDir}:`, err);
+                }
             }
             if (error) {
                 if (error.killed) return reject("Time Limit Exceeded");

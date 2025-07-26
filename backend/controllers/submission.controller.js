@@ -1,59 +1,20 @@
 import { Submission } from "../models/submission.model.js";
 import { Question } from "../models/question.model.js";
-// Import the local judge functions
+import axios from "axios";
 
-import fs from "fs-extra";
-import { executeCpp, executeJava, executePython } from "../judge/execute.js";
-import { generateFile, generateInputFile } from "../judge/generateFile.js";
 
-// Unified helper function to run code and clean up files
-const runCode = async (language, code, input) => {
-    let filePath;
-    let inputFilePath;
-    try {
-        filePath = generateFile(language, code);
-        inputFilePath = generateInputFile(input);
-
-        let output;
-        if (language === 'cpp' || language === 'c') {
-            output = await executeCpp(filePath, inputFilePath);
-        } else if (language === 'py') {
-            output = await executePython(filePath, inputFilePath);
-        } else if (language === 'java') {
-            output = await executeJava(filePath, inputFilePath);
-        } else {
-            throw new Error("Unsupported language");
-        }
-        return { success: true, output: output.trim() };
-    } catch (error) {
-        console.error("Error running code:", error);
-        return { success: false, output: error.toString() };
-    } finally {
-        // Cleanup generated files
-        if (filePath && filePath.endsWith('.java')) {
-            // For Java, we remove the entire unique directory
-            const jobDir = path.dirname(filePath);
-            await fs.remove(jobDir);
-        } else if (filePath) {
-            await fs.remove(filePath);
-        }
-        if (inputFilePath) {
-            await fs.remove(inputFilePath);
-        }
-    }
-};
 
 // Handles "Run" button with custom input
 export const runCustomCode = async (req, res) => {
     const { language, code, input } = req.body;
-    if (code === undefined) {
+    if (!code) {
         return res.status(400).json({ success: false, output: "Code is required." });
     }
-    const result = await runCode(language, code, input || "");
-    if (result.success) {
-        return res.status(200).json(result);
-    } else {
-        return res.status(400).json(result);
+    try {
+        const response = await axios.post("http://localhost:5000/api/execute", { language, code, input });
+        return res.status(200).json(response.data);
+    } catch (error) {
+        return res.status(400).json({ success: false, output: error.message });
     }
 };
 
@@ -78,15 +39,26 @@ export const submitCode = async (req, res) => {
             let finalStatus = 'Accepted';
             let finalOutput = 'All test cases passed!';
             for (const testCase of question.testCases) {
-                const result = await runCode(language, code, testCase.input);
-                if (!result.success) {
-                    finalStatus = 'Compilation Error';
-                    finalOutput = result.output;
-                    break;
-                }
-                if (result.output !== testCase.expectedOutput.trim()) {
-                    finalStatus = 'Wrong Answer';
-                    finalOutput = `Failed on test case.\nInput:\n${testCase.input}\n\nExpected Output:\n${testCase.expectedOutput}\n\nYour Output:\n${result.output}`;
+                try {
+                    const response = await axios.post("http://localhost:5000/api/execute", {
+                        language,
+                        code,
+                        input: testCase.input,
+                    });
+                    const result = response.data;
+                    if (!result.success) {
+                        finalStatus = 'Compilation Error';
+                        finalOutput = result.output;
+                        break;
+                    }
+                    if (result.output.trim() !== testCase.expectedOutput.trim()) {
+                        finalStatus = 'Wrong Answer';
+                        finalOutput = `Failed on test case.\nInput:\n${testCase.input}\n\nExpected Output:\n${testCase.expectedOutput}\n\nYour Output:\n${result.output}`;
+                        break;
+                    }
+                } catch (err) {
+                    finalStatus = 'Error';
+                    finalOutput = err.message;
                     break;
                 }
             }

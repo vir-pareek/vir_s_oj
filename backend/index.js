@@ -17,7 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-    origin: "https://vir-s-oj-q6sx.vercel.app",
+    origin: "https://vir-s-oj.vercel.app",
     credentials: true, //allows cookies to be sent with requests
 }));
 

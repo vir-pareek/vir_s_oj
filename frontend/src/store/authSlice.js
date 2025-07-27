@@ -36,7 +36,7 @@ export const logout = createAsyncThunk(
             await axios.post(`${API_URL}/logout`);
             return;
         } catch (err) {
-            return rejectWithValue('Logout failed');
+            return rejectWithValue(err.response?.data?.message || 'Logout failed');
         }
     }
 );
@@ -75,11 +75,28 @@ const authSlice = createSlice({
             .addCase(login.fulfilled, (state, action) => { state.status = 'succeeded'; state.user = action.payload; state.isAuthenticated = true; })
             .addCase(login.rejected, (state, action) => { state.status = 'failed'; state.error = action.payload; })
 
-            .addCase(logout.fulfilled, state => { state.user = null; state.isAuthenticated = false; state.status = 'idle'; })
+            .addCase(logout.pending, state => { // <-- ADDED: Handles loading state for logout.
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(logout.fulfilled, state => {
+                state.user = null;
+                state.isAuthenticated = false;
+                state.status = 'idle';
+                state.error = null;
+            })
+            .addCase(logout.rejected, (state, action) => { // <-- ADDED: Handles logout failure.
+                // Even if logout fails on the server, clear client state for better UX.
+                state.user = null;
+                state.isAuthenticated = false;
+                state.status = 'failed';
+                state.error = action.payload;
+            })
 
             .addCase(checkAuth.pending, state => { state.status = 'loading'; })
             .addCase(checkAuth.fulfilled, (state, action) => { state.status = 'succeeded'; state.user = action.payload; state.isAuthenticated = true; })
             .addCase(checkAuth.rejected, state => { state.status = 'failed'; state.user = null; state.isAuthenticated = false; });
+            
     }
 });
 

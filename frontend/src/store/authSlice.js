@@ -2,7 +2,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = import.meta.env.DEV ? 'http://localhost:5000/api/auth' : '/api/auth';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/auth`;
 axios.defaults.withCredentials = true;
 
 export const signup = createAsyncThunk(

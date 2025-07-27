@@ -87,10 +87,36 @@ export const login = async (req, res) => {
     }
 }
 
+// export const logout = async (req, res) => {
+//     res.clearCookie("token")
+//     res.status(200).json({ success: true, message: "Logged out successfully" });
+// }
+// In controllers/auth.controller.js
+
+// --- (Your signup and login functions are above this) ---
+
 export const logout = async (req, res) => {
-    res.clearCookie("token")
-    res.status(200).json({ success: true, message: "Logged out successfully" });
-}
+    try {
+        // Determine if running in production to set cookie options correctly
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        // To clear the cookie, you must pass the same options used to set it.
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: isProduction, // Must be true in production (HTTPS)
+            sameSite: isProduction ? "none" : "lax", // 'none' for cross-site, 'lax' for local
+        });
+
+        res.status(200).json({ success: true, message: "Logged out successfully" });
+
+    } catch (error) {
+        console.log("Error in logout controller: ", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+
+// --- (Your checkAuth function is below this) ---
 
 export const checkAuth = async (req, res) => {
     try {

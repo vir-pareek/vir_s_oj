@@ -7,7 +7,7 @@ export const generateTokenAndSetCookie = (res,userId) => {
     res.cookie("token", token, {
         httpOnly: true, //only http not js and prvents xss attacks
         secure: process.env.NODE_ENV === "production", //secure https: s:secure
-        sameSite: "strict", //protects from csrf
+        sameSite: "none", //protects from csrf
         maxAge : 7*24*60*60*1000,// 7 days in milliseconds
     });
     return token;

@@ -7,6 +7,7 @@ import { fetchUserSubmissions } from "../store/submissionSlice";
 const QuestionsListPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth); // added for authentication
   const {
     list: questions,
     status: qStatus,
@@ -25,6 +26,16 @@ const QuestionsListPage = () => {
       dispatch(fetchUserSubmissions());
     }
   }, [dispatch, qStatus, sStatus, user]);
+
+  // ADD THIS NEW HANDLER FUNCTION
+  const handleSolveClick = (questionId) => {
+    if (isAuthenticated) {
+      navigate(`/questions/${questionId}`);
+    } else {
+      // If not logged in, redirect to the login page
+      navigate("/login");
+    }
+  };
 
   const questionStatuses = useMemo(() => {
     const statuses = new Map();
@@ -55,13 +66,14 @@ const QuestionsListPage = () => {
 
   if (qStatus === "loading")
     return <p className="text-center text-white">Loading questions...</p>;
-  if (error)
-    return <p className="text-center text-red-500">Error: {error}</p>;
+  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
   return (
     <div className="w-full max-w-4xl mx-auto my-8 p-8 rounded-3xl shadow-2xl bg-gray-900/80 backdrop-blur-lg border border-gray-800">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-teal-400">Questions</h2>
+        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-teal-400">
+          Questions
+        </h2>
         {user?.isAdmin && (
           <Link
             to="/questions/create"
@@ -75,9 +87,15 @@ const QuestionsListPage = () => {
         <table className="min-w-full rounded-xl overflow-hidden shadow-lg bg-gray-900/70">
           <thead>
             <tr className="bg-gray-800/80">
-              <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300 uppercase tracking-wider">Title</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300 uppercase tracking-wider">Company</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300 uppercase tracking-wider">
+                Title
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300 uppercase tracking-wider">
+                Company
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300 uppercase tracking-wider">
+                Status
+              </th>
               <th className="px-6 py-3"></th>
             </tr>
           </thead>
@@ -99,7 +117,7 @@ const QuestionsListPage = () => {
                   </td>
                   <td className="px-6 py-2 text-right">
                     <button
-                      onClick={() => navigate(`/questions/${q._id}`)}
+                      onClick={() => handleSolveClick(q._id)}
                       className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-1 rounded transition"
                     >
                       Solve

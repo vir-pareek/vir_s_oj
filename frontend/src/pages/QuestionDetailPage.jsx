@@ -415,6 +415,83 @@ import ConfirmationModal from "../components/ConfirmationModal";
 import ResizablePanels from "../components/ResizablePanels";
 import client from "../api/client";
 
+// For boilerplate
+
+const DEFAULT_PLACEHOLDER = "// Your code here";
+
+const BOILERPLATES = {
+  cpp: `#include <iostream>
+#include <vector>
+#include <string>
+
+// Solution class for organization
+class Solution {
+public:
+    void solve() {
+        // Your code here
+    }
+};
+
+int main() {
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(NULL);
+    Solution solution;
+    solution.solve();
+    return 0;
+}`,
+  c: `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void solve() {
+    // Your code here
+}
+
+int main() {
+    solve();
+    return 0;
+}`,
+  py: `# For competitive programming, it's common to use sys for faster I/O
+import sys
+
+def solve():
+    # Read input using sys.stdin.readline() for speed
+    # Example: line = sys.stdin.readline().strip()
+    pass
+
+if __name__ == "__main__":
+    solve()
+`,
+  java: `import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // Use BufferedReader for faster I/O
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        
+        // Your code here
+    }
+}`,
+};
+
+// An array of all possible boilerplate values for easy checking
+const ALL_BOILERPLATES = Object.values(BOILERPLATES);
+
+// Effect to set boilerplate code when language changes
+useEffect(() => {
+    // Check if the current code is one of our boilerplates
+    const isCurrentCodeBoilerplate = ALL_BOILERPLATES.includes(code.trim());
+    // Check if the current code is the initial placeholder
+    const isCurrentCodePlaceholder = code.trim() === DEFAULT_PLACEHOLDER;
+
+    // Only update if the user hasn't written their own code
+    if (isCurrentCodeBoilerplate || isCurrentCodePlaceholder) {
+        setCode(BOILERPLATES[language] || DEFAULT_PLACEHOLDER);
+    }
+}, [language]); // This effect runs only when the 'language' state changes
+
+
 const QuestionDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();

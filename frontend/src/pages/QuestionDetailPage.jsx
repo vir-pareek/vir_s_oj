@@ -113,16 +113,23 @@ const QuestionDetailPage = () => {
 
   // Effect to set boilerplate code when language changes
   useEffect(() => {
-    // Check if the current code is one of our boilerplates
-    const isCurrentCodeBoilerplate = ALL_BOILERPLATES.includes(code.trim());
-    // Check if the current code is the initial placeholder
-    const isCurrentCodePlaceholder = code.trim() === DEFAULT_PLACEHOLDER;
+    // Helper function to normalize strings by trimming and standardizing line endings
+    const normalize = (str) => str.replace(/\r\n/g, "\n").trim();
 
-    // Only update if the user hasn't written their own code
+    const normalizedCode = normalize(code);
+
+    // Check if the current code matches any of the normalized boilerplates
+    const isCurrentCodeBoilerplate = ALL_BOILERPLATES.some(
+      (b) => normalize(b) === normalizedCode
+    );
+    const isCurrentCodePlaceholder =
+      normalizedCode === normalize(DEFAULT_PLACEHOLDER);
+
+    // This condition now correctly allows switching between any boilerplates
     if (isCurrentCodeBoilerplate || isCurrentCodePlaceholder) {
       setCode(BOILERPLATES[language] || DEFAULT_PLACEHOLDER);
     }
-  }, [language]); // This effect runs only when the 'language' state changes
+  }, [language]);
 
 
   // Effect to save code to localStorage whenever it changes

@@ -12,7 +12,9 @@ import VerdictComponent from "../components/VerdictComponent";
 import ConfirmationModal from "../components/ConfirmationModal";
 import ResizablePanels from "../components/ResizablePanels";
 import client from "../api/client";
-
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast"; // For showing a message
 // For boilerplate
 
 const DEFAULT_PLACEHOLDER = "// Your code here";
@@ -82,6 +84,8 @@ const QuestionDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  // Get the authentication status
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const {
     selectedQuestion: question,
@@ -131,7 +135,6 @@ const QuestionDetailPage = () => {
     }
   }, [language]);
 
-
   // Effect to save code to localStorage whenever it changes
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -174,6 +177,11 @@ const QuestionDetailPage = () => {
   };
 
   const handleSubmit = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to submit your solution.");
+      navigate("/login");
+      return; // Stop the function here
+    }
     setIsSubmitting(true);
     setVerdict(null);
     setReview("");
@@ -234,6 +242,12 @@ const QuestionDetailPage = () => {
   };
 
   const handleRunCode = async () => {
+    // Add this check at the top of the function
+    if (!isAuthenticated) {
+      toast.error("Please log in to run your code.");
+      navigate("/login");
+      return; // Stop the function here
+    }
     setIsRunLoading(true);
     setRunOutput("");
     setActiveTab("custom");
@@ -354,14 +368,14 @@ const QuestionDetailPage = () => {
           <button
             onClick={handleRunCode}
             className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition-colors disabled:opacity-50"
-            disabled={isRunLoading || isSubmitting}
+            disabled={isRunLoading || isSubmitting || !isAuthenticated}
           >
             {isRunLoading ? "Running..." : "Run"}
           </button>
           <button
             onClick={handleSubmit}
             className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors disabled:opacity-50"
-            disabled={isSubmitting || isRunLoading}
+            disabled={isSubmitting || isRunLoading || !isAuthenticated}
           >
             {isSubmitting ? "Submitting..." : "Submit"}
           </button>

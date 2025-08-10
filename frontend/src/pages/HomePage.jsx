@@ -169,12 +169,12 @@ const HomePage = () => {
             transition={{ duration: 0.7 }}
           >
             <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 leading-tight">
-              Level Up Your Coding Skills
+              Get ready for your OAs and Interviews
             </h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              Solve challenging problems, get instant feedback with AI-powered
-              code reviews, and track your progress on our modern coding
-              platform.
+              Solve challenging problems, get hints along the way, and an instant feedback with AI-powered
+              code reviews, only on CodeJoy.
+              Enjoy Coding
             </p>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
@@ -193,8 +193,7 @@ const HomePage = () => {
                 Why CodeJoy?
               </h2>
               <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
-                We provide the tools you need to prepare for interviews, enhance
-                your problem-solving abilities, and become a better developer.
+                We provide a comprehensive platform for coding practice, interview preparation, and skill development.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -259,7 +258,7 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto text-center text-gray-500">
           <p>&copy; {new Date().getFullYear()} CodeJoy. All rights reserved.</p>
           <p className="mt-2 text-sm">
-            Built with passion for coders, by coders.
+            Built with passion in INDIA, by Vir Pareek.
           </p>
         </div>
       </footer>

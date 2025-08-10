@@ -478,18 +478,6 @@ public class Main {
 // An array of all possible boilerplate values for easy checking
 const ALL_BOILERPLATES = Object.values(BOILERPLATES);
 
-// Effect to set boilerplate code when language changes
-useEffect(() => {
-    // Check if the current code is one of our boilerplates
-    const isCurrentCodeBoilerplate = ALL_BOILERPLATES.includes(code.trim());
-    // Check if the current code is the initial placeholder
-    const isCurrentCodePlaceholder = code.trim() === DEFAULT_PLACEHOLDER;
-
-    // Only update if the user hasn't written their own code
-    if (isCurrentCodeBoilerplate || isCurrentCodePlaceholder) {
-        setCode(BOILERPLATES[language] || DEFAULT_PLACEHOLDER);
-    }
-}, [language]); // This effect runs only when the 'language' state changes
 
 
 const QuestionDetailPage = () => {
@@ -508,10 +496,7 @@ const QuestionDetailPage = () => {
   const localStorageKey = `codejoy-code-${id}`;
   const [code, setCode] = useState(() => {
     const savedCode = localStorage.getItem(localStorageKey);
-    return (
-      savedCode ||
-      "// Your code here"
-    );
+    return savedCode || "// Your code here";
   });
 
   // Other state variables
@@ -547,6 +532,19 @@ const QuestionDetailPage = () => {
       dispatch(clearSelectedQuestion());
     };
   }, [dispatch, id]);
+
+  // Effect to set boilerplate code when language changes
+  useEffect(() => {
+    // Check if the current code is one of our boilerplates
+    const isCurrentCodeBoilerplate = ALL_BOILERPLATES.includes(code.trim());
+    // Check if the current code is the initial placeholder
+    const isCurrentCodePlaceholder = code.trim() === DEFAULT_PLACEHOLDER;
+
+    // Only update if the user hasn't written their own code
+    if (isCurrentCodeBoilerplate || isCurrentCodePlaceholder) {
+      setCode(BOILERPLATES[language] || DEFAULT_PLACEHOLDER);
+    }
+  }, [language]); // This effect runs only when the 'language' state changes
 
   const handleGetReview = async () => {
     if (!verdict) return;

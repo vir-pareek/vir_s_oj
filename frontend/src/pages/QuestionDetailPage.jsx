@@ -12,9 +12,9 @@ import VerdictComponent from "../components/VerdictComponent";
 import ConfirmationModal from "../components/ConfirmationModal";
 import ResizablePanels from "../components/ResizablePanels";
 import client from "../api/client";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast"; // For showing a message
+// import { useSelector } from "react-redux";
+// import { useNavigate } from "react-router-dom";
+// import toast from "react-hot-toast"; // For showing a message
 // For boilerplate
 
 const DEFAULT_PLACEHOLDER = "// Your code here";

@@ -149,7 +149,7 @@ const HomePage = () => {
               <span>Login</span>
             </Link>
             <Link
-              to="/register"
+              to="/signup"
               className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
             >
               <FiUserPlusIcon />

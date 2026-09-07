@@ -15,7 +15,7 @@ This project was a journey into full-stack development and system design to unde
 - Get instant feedback on submissions, such as Accepted, Wrong Answer, or Time Limit Exceeded.
 
 2. Tech Stack & Architecture
-3. 
+
 Frontend: React.js & Tailwind CSS (Deployed on Vercel)
 
 Backend: Node.js & Express.js (Deployed on Render)
@@ -24,7 +24,7 @@ Database: MongoDB
 
 Code Execution Compiler: A custom compiler using Docker for sandboxing (Deployed on AWS)
 
-System Flow:
+3. System Flow:
 
 A user submits code from the React frontend.
 
